@@ -1,0 +1,10 @@
+# Builded gems
+*.gem
+
+# Reports
+/coverage
+
+# Gemfile
+Gemfile.lock
+
+# Tmp of dummy app
