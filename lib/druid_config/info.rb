@@ -62,5 +62,11 @@ module DruidConfig
     def rules
       self.class.get('/rules')
     end
+
+    # Servers
+    # -----------------
+    def servers(params = '')
+      self.class.get("/servers?#{params}")
+    end
   end
 end
