@@ -2,7 +2,28 @@ module DruidConfig
   #
   # Class to initialize the connection to Zookeeper
   #
-  class Info < DruidConfig::QueryBase
+  class Cluster
+    # HTTParty Rocks!
+    include HTTParty
+
+    #
+    # Initialize the client to perform the queris
+    #
+    def initialize(zk_uri, options)
+      DruidConfig.client = DruidConfig::Client.new(zk_uri, options)
+      # Update the base uri to perform queries
+      self.class.base_uri(
+        "#{DruidConfig.client.coordinator}"\
+        "druid/coordinator/#{DruidConfig::API_VERSION}")
+    end
+
+    #
+    # Close connection with zookeeper
+    #
+    def close!
+      DruidConfig.client.close!
+    end
+
     # ------------------------------------------------------------
     # Queries!
     # ------------------------------------------------------------
@@ -49,12 +70,14 @@ module DruidConfig
 
     # Data sources
     # -----------------
-    def datasources(params = '')
-      self.class.get("/datasources?#{params}")
+    def datasources
+      self.class.get('/datasources?full').map do |data|
+        DruidConfig::Entities::DataSource.new(data)
+      end
     end
 
     def datasource(datasource)
-      DruidConfig::Entities::DataSource.new(datasource, @client)
+      datasources.select { |el| el.name == datasource }
     end
 
     # Rules

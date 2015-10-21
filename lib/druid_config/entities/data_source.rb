@@ -5,13 +5,22 @@ module DruidConfig
   module Entities
     #
     # Init a DataSource
-    class DataSource  < DruidConfig::QueryBase
+    class DataSource
+      # HTTParty Rocks!
+      include HTTParty
+
+      attr_reader :name, :properties
+
       #
       # Initialize a DataSource
       #
-      def initialize(name, client)
-        @name = name
-        super(client)
+      def initialize(metadata)
+        @name = metadata['name']
+        @properties = metadata['properties']
+        # Set end point for HTTParty
+        self.class.base_uri(
+          "#{DruidConfig.client.coordinator}"\
+          "druid/coordinator/#{DruidConfig::API_VERSION}")
       end
 
       #
@@ -22,7 +31,7 @@ module DruidConfig
       #
 
       def info(params = '')
-        self.class.get("/datasources/#{@name}?#{params}")
+        @info ||= self.class.get("/datasources/#{@name}?#{params}")
       end
 
       # Intervals
@@ -38,16 +47,19 @@ module DruidConfig
 
       # Segments and Tiers
       # -----------------
-      def segments(params = '')
-        self.class.get("/datasources/#{@name}/segments?#{params}")
+      def segments
+        @segments ||=
+          self.class.get("/datasources/#{@name}/segments?full").map do |s|
+            DruidConfig::Entities::Segment.new(s)
+          end
       end
 
       def segment(segment)
-        self.class.get("/datasources/#{@name}/segments/#{segment}")
+        segments.select { |s| s.id == segment }
       end
 
       def tiers
-        self.class.get("/datasources/#{@name}/tiers")
+        info['tiers']
       end
 
       # Rules
