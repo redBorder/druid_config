@@ -24,7 +24,7 @@ module DruidConfig
         @metrics = metadata['metrics'].split(',').map(&:to_sym)
         @shard_spec = metadata['shardSpec']
         @binary_version = metadata['binaryVersion']
-        @size = size
+        @size = metadata['size']
       end
 
       #

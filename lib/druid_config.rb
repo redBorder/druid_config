@@ -11,19 +11,19 @@ require 'druid_config/client'
 # Base namespace of the gem
 module DruidConfig
   # Global client of Druidconfig module
-  @@client = nil
+  @client = nil
 
   #
   # Initialize the current client
   #
   def self.client=(client)
-    @@client = client
+    @client = client
   end
 
   #
   # Return initialized client
   #
   def self.client
-    @@client
+    @client
   end
 end
