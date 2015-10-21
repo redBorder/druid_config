@@ -5,19 +5,13 @@ module DruidConfig
   module Entities
     #
     # Init a DataSource
-    class DataSource
-      # HTTParty Rocks!
-      include HTTParty
-
+    class DataSource  < DruidConfig::QueryBase
       #
       # Initialize a DataSource
       #
       def initialize(name, client)
         @name = name
-        @client = client
-        # Update the base uri to perform queries
-        self.class.base_uri(
-          "#{@client.coordinator}druid/coordinator/#{DruidConfig::API_VERSION}")
+        super(client)
       end
 
       #
