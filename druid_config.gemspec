@@ -15,8 +15,8 @@ Gem::Specification.new do |s|
   s.licenses     = ['AGPL']
   # Main dependencies
   s.add_dependency 'zk', '>= 1.9.5'
-  s.add_dependency 'httparty', '0.13.7'
-  s.add_dependency 'rest-client', '1.8.0'
+  s.add_dependency 'httparty', '>= 0.13.0'
+  s.add_dependency 'rest-client', '>= 1.8.0'
   # Dependencies for testing
   s.add_development_dependency 'rspec', '>= 3.2'
   s.add_development_dependency 'rspec-rails', '>= 3.2'
