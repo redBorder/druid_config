@@ -23,4 +23,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'sqlite3', '1.3.11'
   s.add_development_dependency 'pry', '0.10.3'
   s.add_development_dependency 'pry-nav', '0.2.4'
+  s.add_development_dependency 'webmock', '1.22.1'
 end
