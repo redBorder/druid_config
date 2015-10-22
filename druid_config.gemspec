@@ -2,7 +2,7 @@ require File.expand_path('../lib/druid_config/version', __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = 'druid_config'
-  s.version     = DruidConfig::VERSION
+  s.version     = DruidConfig::Version::VERSION
   s.summary     = 'Fetch Druid info and configure your cluster'
   s.description = 'Fetch Druid info using Druid API. You can fetch all data '\
                   'related to your nodes, data sources, segments...'

@@ -14,7 +14,7 @@ module DruidConfig
       # Update the base uri to perform queries
       self.class.base_uri(
         "#{DruidConfig.client.coordinator}"\
-        "druid/coordinator/#{DruidConfig::API_VERSION}")
+        "druid/coordinator/#{DruidConfig::Version::API_VERSION}")
     end
 
     #

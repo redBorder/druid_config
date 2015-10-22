@@ -3,6 +3,7 @@ require 'httparty'
 
 # Classes
 require 'druid_config/zk'
+require 'druid_config/version'
 require 'druid_config/entities/segment'
 require 'druid_config/entities/node'
 require 'druid_config/entities/tier'
