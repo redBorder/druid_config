@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'pry'
-require 'pry-nav'
 
 describe DruidConfig::Entities::DataSource do
   before(:each) do

@@ -97,7 +97,7 @@ module DruidConfig
       current_nodes.map(&:tier).uniq.map do |tier|
         DruidConfig::Entities::Tier.new(
           tier,
-          current_nodes.select { |node| node.tier_name == tier })
+          current_nodes.select { |node| node.tier == tier })
       end
     end
 
