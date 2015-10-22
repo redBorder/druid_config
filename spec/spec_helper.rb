@@ -21,6 +21,13 @@ RSpec.configure do |config|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 
+  # Use color in STDOUT
+  config.color = true
+  # Use color not only in STDOUT but also in pagers and files
+  config.tty = true
+  # Use the specified formatter
+  config.formatter = :documentation # :progress, :html, :textmate
+
   config.mock_with :rspec do |mocks|
     # Prevents you from mocking or stubbing a method that does not exist on
     # a real object. This is generally recommended, and will default to
