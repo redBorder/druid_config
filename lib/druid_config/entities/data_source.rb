@@ -9,14 +9,15 @@ module DruidConfig
       # HTTParty Rocks!
       include HTTParty
 
-      attr_reader :name, :properties
+      attr_reader :name, :properties, :load_status
 
       #
       # Initialize a DataSource
       #
-      def initialize(metadata)
+      def initialize(metadata, load_status)
         @name = metadata['name']
         @properties = metadata['properties']
+        @load_status = load_status
         # Set end point for HTTParty
         self.class.base_uri(
           "#{DruidConfig.client.coordinator}"\

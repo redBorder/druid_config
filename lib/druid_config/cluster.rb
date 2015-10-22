@@ -71,8 +71,11 @@ module DruidConfig
     # Data sources
     # -----------------
     def datasources
+      datasource_status = load_status
       self.class.get('/datasources?full').map do |data|
-        DruidConfig::Entities::DataSource.new(data)
+        DruidConfig::Entities::DataSource.new(
+          data,
+          datasource_status.select { |k, _| k == data['name'] }.values.first)
       end
     end
 
@@ -86,13 +89,30 @@ module DruidConfig
       self.class.get('/rules')
     end
 
+    # Tiers
+    # -----------------
+    def tiers
+      current_nodes = servers
+      # Initialize tiers
+      current_nodes.map(&:tier).uniq.map do |tier|
+        DruidConfig::Entities::Tier.new(
+          tier,
+          current_nodes.select { |node| node.tier_name == tier })
+      end
+    end
+
     # Servers
     # -----------------
     def servers
+      queue = load_queue('full')
       self.class.get('/servers?full').map do |data|
-        DruidConfig::Entities::Node.new(data)
+        DruidConfig::Entities::Node.new(
+          data,
+          queue.select { |k, _| k == data['host'] }.values.first)
       end
     end
+
+    alias_method :nodes, :servers
 
     #
     # Returns only historial nodes
@@ -107,7 +127,5 @@ module DruidConfig
     def realtimes
       servers.select { |node| node.type == :realtime }
     end
-
-    alias_method :nodes, :servers
   end
 end
