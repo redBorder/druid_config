@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
                   'related to your nodes, data sources, segments...'
   s.authors     = ['Angel M Miguel']
   s.email       = 'angelmm@redborder.net'
-  s.files       = Dir['lib/**/*'] + %w(LICENSE README.md Rakefile)
+  s.files       = Dir['lib/**/*'] + %w(LICENSE README.md)
   s.homepage    = 'http://redborder.net'
   s.test_files = Dir['spec/**/*']
   s.require_paths = ['lib']
