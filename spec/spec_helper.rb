@@ -1,8 +1,13 @@
 require 'druid_config'
 require 'webmock/rspec'
 
-# Disable external connections
-WebMock.disable_net_connect!(allow_localhost: true)
+# Mock Druid
+ENV['MOCK_DRUID'] ||= 'false'
+
+if ENV['MOCK_DRUID'] == 'true'
+  # Disable external connections
+  WebMock.disable_net_connect!(allow_localhost: true)
+end
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -27,19 +32,41 @@ RSpec.configure do |config|
   # Mock druid API queries
   #
   config.before(:each) do
-    # Stub DruidConfig::Client to ignore Zookeeper.
-    # TODO: We must improve it!!!
-    class ClientStub
-      def coordinator
-        'coordinator.stub/'
+    if ENV['MOCK_DRUID'] == 'true'
+      # Stub DruidConfig::Client to ignore Zookeeper.
+      # TODO: We must improve it!!!
+      class ClientStub
+        def coordinator
+          'coordinator.stub/'
+        end
       end
-    end
-    allow(DruidConfig::Client).to receive(:new) { ClientStub.new }
+      allow(DruidConfig).to receive(:client) { ClientStub.new }
 
-    # Stub queries
-    # ----------------------------------
-    stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/leader')
-      .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
-      .to_return(status: 200, body: 'coordinator.stub', headers: {})
+      # Stub queries
+      # ----------------------------------
+      
+      # Our scenario:
+      # leader: coordinator.stub
+      # datasources: datasource1, datasource2
+      # tiers: _default_tier, hot
+      # stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/leader')
+      #   .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
+      #   .to_return(status: 200, body: 'coordinator.stub', headers: {})
+
+      # stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/loadstatus')
+      #   .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
+      #   .to_return(status: 200, body: '{"datasource1":100.0,"datasource2":100.0}',
+      #              headers: { 'Content-Type' => 'application/json' })
+
+      # stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/loadstatus?simple')
+      #   .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
+      #   .to_return(status: 200, body: '{"datasource1":0,"datasource2":0}',
+      #              headers: { 'Content-Type' => 'application/json' })
+
+      # stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/loadstatus?full')
+      #   .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
+      #   .to_return(status: 200, body: '{"_default_tier":{"datasource1":0}, "hot":{"datasource2":0}}',
+      #              headers: { 'Content-Type' => 'application/json' })
+    end
   end
 end
