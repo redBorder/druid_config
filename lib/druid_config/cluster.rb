@@ -88,8 +88,26 @@ module DruidConfig
 
     # Servers
     # -----------------
-    def servers(params = '')
-      self.class.get("/servers?#{params}")
+    def servers
+      self.class.get('/servers?full').map do |data|
+        DruidConfig::Entities::Node.new(data)
+      end
     end
+
+    #
+    # Returns only historial nodes
+    #
+    def historicals
+      servers.select { |node| node.type == :historical }
+    end
+
+    #
+    # Returns only realtime
+    #
+    def realtimes
+      servers.select { |node| node.type == :realtime }
+    end
+
+    alias_method :nodes, :servers
   end
 end
