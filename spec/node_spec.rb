@@ -35,7 +35,8 @@ describe DruidConfig::Entities::Node do
 
   it 'initialize a Node based on metadata' do
     datasource = DruidConfig::Entities::Node.new(@metadata, @queue)
-    expect(datasource.host).to eq @host
+    expect(datasource.host).to eq @host.split(':').first
+    expect(datasource.uri).to eq @host
     expect(datasource.max_size).to eq @max_size
     expect(datasource.type).to eq @type.to_sym
     expect(datasource.priority).to eq @priority
