@@ -113,7 +113,7 @@ module DruidConfig
     end
 
     def physical_servers
-      @physical_servers ||= servers.map { |s| s.host.split(':').first }.uniq!
+      @physical_servers ||= servers.map { |s| s.host.split(':').first }.uniq
     end
 
     alias_method :nodes, :servers
@@ -150,6 +150,10 @@ module DruidConfig
       pop_uri
       # Return
       workers
+    end
+
+    def physical_workers
+      @physical_workers ||= workers.map { |s| s.host.split(':').first }.uniq
     end
 
     private
