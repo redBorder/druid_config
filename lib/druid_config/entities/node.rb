@@ -8,7 +8,7 @@ module DruidConfig
       include HTTParty
 
       # Readers
-      attr_reader :host, :max_size, :type, :tier, :priority, :size,
+      attr_reader :host, :port, :max_size, :type, :tier, :priority, :size,
                   :segments, :segments_to_load, :segments_to_drop
 
       #
@@ -21,7 +21,7 @@ module DruidConfig
       #   Hash with segments to load
       #
       def initialize(metadata, queue)
-        @host = metadata['host']
+        @host, @port = metadata['host'].split(':')
         @max_size = metadata['maxSize']
         @type = metadata['type'].to_sym
         @tier = metadata['tier']
@@ -43,10 +43,12 @@ module DruidConfig
         end
       end
 
+      alias_method :used, :size
+
       #
       # Calculate the percent of used space
       #
-      def used
+      def used_percent
         return 0 unless max_size && max_size != 0
         ((size.to_f / max_size) * 100).round(2)
       end
@@ -56,6 +58,13 @@ module DruidConfig
       #
       def free
         max_size - size
+      end
+
+      #
+      # Return the URI of this node
+      #
+      def uri
+        "#{@host}:#{@port}"
       end
     end
   end

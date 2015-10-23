@@ -113,7 +113,7 @@ module DruidConfig
     end
 
     def physical_servers
-      @physical_servers ||= servers.map { |s| s.host.split(':').first }.uniq
+      @physical_servers ||= servers.map(&:host).uniq
     end
 
     alias_method :nodes, :servers
@@ -133,9 +133,7 @@ module DruidConfig
       servers.select { |node| node.type == :realtime }
     end
 
-    #
-    # Workers
-    #
+    # workers
     def workers
       # Stash the base_uri
       stash_uri
@@ -153,7 +151,22 @@ module DruidConfig
     end
 
     def physical_workers
-      @physical_workers ||= workers.map { |s| s.host.split(':').first }.uniq
+      @physical_workers ||= workers.map(&:host).uniq
+    end
+
+    # Services
+    # -----------------
+    
+    def services
+      return @services if @services
+      services = {}
+      physical_nodes.each { |node| services[node] = [] }
+      # Load services
+      realtimes.map(&:host).uniq.each { |r| services[r] << :realtime }
+      historicals.map(&:host).uniq.each { |r| services[r] << :historical }
+      physical_workers.each { |w| services[w] << :middleManager }
+      # Return nodes
+      @services = services
     end
 
     private

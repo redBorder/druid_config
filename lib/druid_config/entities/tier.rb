@@ -18,6 +18,8 @@ module DruidConfig
         @size ||= nodes.map(&:size).inject(:+)
       end
 
+      alias_method :used, :size
+
       def max_size
         @max_size ||= nodes.map(&:max_size).inject(:+)
       end
@@ -26,7 +28,7 @@ module DruidConfig
         @free ||= (max_size - size)
       end
 
-      def used
+      def used_percent
         return 0 unless max_size && max_size != 0
         ((size.to_f / max_size) * 100).round(2)
       end

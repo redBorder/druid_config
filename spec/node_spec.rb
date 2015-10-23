@@ -51,12 +51,12 @@ describe DruidConfig::Entities::Node do
 
   it 'calculate percentage of used space' do
     datasource = DruidConfig::Entities::Node.new(@metadata, @queue)
-    expect(datasource.used).to eq((@size.to_f / @max_size) * 100)
+    expect(datasource.used_percent).to eq((@size.to_f / @max_size) * 100)
   end
 
   it 'return 0 when max size is 0' do
     datasource =
       DruidConfig::Entities::Node.new(@metadata.merge('maxSize' => 0), @queue)
-    expect(datasource.used).to eq 0
+    expect(datasource.used_percent).to eq 0
   end
 end

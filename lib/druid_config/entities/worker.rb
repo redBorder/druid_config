@@ -5,8 +5,8 @@ module DruidConfig
     #
     class Worker
       # Readers
-      attr_reader :last_completed_task_time, :host, :ip, :capacity, :version,
-                  :running_tasks, :current_capacity_used
+      attr_reader :last_completed_task_time, :host, :port, :ip, :capacity,
+                   :version, :running_tasks, :current_capacity_used
 
       #
       # Initialize it with received info
@@ -16,7 +16,7 @@ module DruidConfig
       #   Hash with returned metadata from Druid
       #
       def initialize(metadata)
-        @host = metadata['worker']['host']
+        @host, @port = metadata['worker']['host'].split(':')
         @ip = metadata['worker']['ip']
         @capacity = metadata['worker']['capacity']
         @version = metadata['worker']['version']
@@ -38,6 +38,13 @@ module DruidConfig
       def used
         return 0 unless @capacity && @capacity != 0
         ((@capacity_used.to_f / @capacity) * 100).round(2)
+      end
+
+      #
+      # Return the uri of the worker
+      #
+      def uri
+        "#{@host}:#{@port}"
       end
     end
   end
