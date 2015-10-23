@@ -18,5 +18,12 @@ module DruidConfig
     def coordinator
       zk.coordinator
     end
+
+    #
+    # Get the URI of a overlord
+    #
+    def overlord
+      zk.overlord
+    end
   end
 end

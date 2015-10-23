@@ -112,7 +112,12 @@ module DruidConfig
       end
     end
 
+    def physical_servers
+      @physical_servers ||= servers.map { |s| s.host.split(':').first }.uniq!
+    end
+
     alias_method :nodes, :servers
+    alias_method :physical_nodes, :physical_servers
 
     #
     # Returns only historial nodes
@@ -126,6 +131,43 @@ module DruidConfig
     #
     def realtimes
       servers.select { |node| node.type == :realtime }
+    end
+
+    #
+    # Workers
+    #
+    def workers
+      # Stash the base_uri
+      stash_uri
+      self.class.base_uri(
+        "#{DruidConfig.client.overlord}"\
+        "druid/indexer/#{DruidConfig::Version::API_VERSION}")
+      # Perform a query
+      workers = self.class.get('/workers').map do |worker|
+        DruidConfig::Entities::Worker.new(worker)
+      end
+      # Recover it
+      pop_uri
+      # Return
+      workers
+    end
+
+    private
+
+    #
+    # Stash current base_uri
+    #
+    def stash_uri
+      @uri_stack ||= []
+      @uri_stack.push self.class.base_uri
+    end
+
+    #
+    # Pop next base_uri
+    #
+    def pop_uri
+      return if @uri_stack.nil? || @uri_stack.empty?
+      self.class.base_uri(@uri_stack.pop)
     end
   end
 end

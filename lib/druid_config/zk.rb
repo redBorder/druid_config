@@ -9,6 +9,8 @@ module DruidConfig
   class ZK
     # Coordinator service
     COORDINATOR = 'coordinator'
+    OVERLORD = 'overlord'
+    SERVICES = [COORDINATOR, OVERLORD]
 
     #
     # Initialize variables and call register
@@ -55,10 +57,29 @@ module DruidConfig
     # Poor mans load balancing
     #
     def coordinator
-      return nil if @registry[COORDINATOR].size == 0
+      random_node(COORDINATOR)
+    end
+
+    #
+    # Return the URI of a random available overlord.
+    # Poor mans load balancing
+    #
+    def overlord
+      random_node(OVERLORD)
+    end
+
+    #
+    # Return a random value of a service
+    #
+    # == Parameters:
+    # service::
+    #   String with the name of the service
+    #
+    def random_node(service)
+      return nil if @registry[service].size == 0
       # Return a random broker from available brokers
-      i = Random.rand(@registry[COORDINATOR].size)
-      @registry[COORDINATOR][i][:uri]
+      i = Random.rand(@registry[service].size)
+      @registry[service][i][:uri]
     end
 
     #
@@ -124,17 +145,19 @@ module DruidConfig
     # == Parameters:
     # name::
     #   String with the name of the coordinator
+    # service::
+    #   String with the service
     #
     # == Returns:
     # URI of the coordinator or false
     #
-    def verify_coordinator(name)
-      $log.info("druid.zk verify", coordinator: name, service: COORDINATOR) if $log
-      info = @zk.get("#{watch_path(COORDINATOR)}/#{name}")
+    def verify_node(name, service)
+      $log.info("druid.zk verify", node: name, service: service) if $log
+      info = @zk.get("#{watch_path(service)}/#{name}")
       node = JSON.parse(info[0])
       uri = "http://#{node['address']}:#{node['port']}/"
       check = RestClient::Request.execute(
-        method: :get, url: "#{uri}druid/coordinator/v1/leader",
+        method: :get, url: "#{uri}status",
         timeout: 5, open_timeout: 5
       )
       $log.info("druid.zk verified", uri: uri, sources: check) if $log
@@ -154,7 +177,8 @@ module DruidConfig
     # Check a service
     #
     def check_service(service)
-      return if @watched_services.include?(service) || service != COORDINATOR
+      return if @watched_services.include?(service) ||
+                !SERVICES.include?(service)
 
       # Start to watch this service
       watch_service(service)
@@ -166,7 +190,7 @@ module DruidConfig
 
       # verify the new entries to be living brokers
       (live - known).each do |name|
-        uri = verify_coordinator(name)
+        uri = verify_node(name, service)
         new_list.push(name: name, uri: uri) if uri
       end
 
