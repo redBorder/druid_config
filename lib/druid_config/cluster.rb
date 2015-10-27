@@ -63,7 +63,7 @@ module DruidConfig
  
     #
     # Return the leader of the Druid cluster
-    #    
+    #
     def leader
       secure_query do
         self.class.get('/leader').body
@@ -104,6 +104,12 @@ module DruidConfig
 
     #
     # Return a Hash with metadata of segments
+    #
+    # == Parameters:
+    # data_source::
+    #   String with the name of the data source
+    # segment::
+    #   (Optional) Segment to search
     #
     def metadata_datasources_segments(data_source, segment = '')
       end_point = "/metadata/datasources/#{data_source}/segments"
