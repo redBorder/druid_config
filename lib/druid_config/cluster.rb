@@ -8,7 +8,14 @@ module DruidConfig
     include DruidConfig::Util
 
     #
-    # Initialize the client to perform the queris
+    # Initialize the client to perform the queries
+    #
+    # == Parameters:
+    # zk_uri::
+    #   String with URI or URIs (sparated by comma) of Zookeeper
+    # options::
+    #   Hash with options:
+    #     - discovery_path: String with the discovery path of Druid
     #
     def initialize(zk_uri, options)
       # Initialize the Client
@@ -53,18 +60,28 @@ module DruidConfig
 
     # Coordinator
     # -----------------
+ 
+    #
+    # Return the leader of the Druid cluster
+    #    
     def leader
       secure_query do
         self.class.get('/leader').body
       end
     end
 
+    #
+    # Load status of the cluster
+    #
     def load_status(params = '')
       secure_query do
         self.class.get("/loadstatus?#{params}")
       end
     end
 
+    #
+    # Load queue of the cluster
+    #
     def load_queue(params = '')
       secure_query do
         self.class.get("/loadqueue?#{params}")
@@ -73,6 +90,10 @@ module DruidConfig
 
     # Metadata
     # -----------------
+    
+    #
+    # Return a Hash with metadata of datasources
+    #
     def metadata_datasources(params = '')
       secure_query do
         self.class.get("/metadata/datasources?#{params}")
@@ -81,6 +102,9 @@ module DruidConfig
 
     alias_method :mt_datasources, :metadata_datasources
 
+    #
+    # Return a Hash with metadata of segments
+    #
     def metadata_datasources_segments(data_source, segment = '')
       end_point = "/metadata/datasources/#{data_source}/segments"
       secure_query do
@@ -96,6 +120,13 @@ module DruidConfig
 
     # Data sources
     # -----------------
+    
+    #
+    # Return all datasources
+    #
+    # == Returns:
+    # Array of Datasource initialized.
+    #
     def datasources
       datasource_status = load_status
       secure_query do
@@ -107,12 +138,26 @@ module DruidConfig
       end
     end
 
+    #
+    # Return a unique datasource
+    #
+    # == Parameters:
+    # datasource:
+    #   String with the data source name
+    #
+    # == Returns:
+    # DataSource instance
+    #
     def datasource(datasource)
       datasources.select { |el| el.name == datasource }
     end
 
     # Rules
     # -----------------
+    
+    #
+    # Return the rules applied to a cluster
+    #
     def rules
       secure_query do
         self.class.get('/rules')
@@ -121,6 +166,13 @@ module DruidConfig
 
     # Tiers
     # -----------------
+ 
+    #
+    # Return all tiers defined in the cluster
+    #
+    # == Returns:
+    # Array of Tier instances
+    #
     def tiers
       current_nodes = servers
       # Initialize tiers
@@ -135,6 +187,13 @@ module DruidConfig
 
     # Servers
     # -----------------
+
+    #
+    # Return all nodes of the cluster
+    #
+    # == Returns:
+    # Array of node Objects
+    #
     def servers
       secure_query do
         queue = load_queue('full')
@@ -146,6 +205,12 @@ module DruidConfig
       end
     end
 
+    #
+    # URIs of the physical servers in the cluster
+    #
+    # == Returns:
+    # Array of strings
+    #
     def physical_servers
       secure_query do
         @physical_servers ||= servers.map(&:host).uniq
@@ -158,6 +223,9 @@ module DruidConfig
     #
     # Returns only historial nodes
     #
+    # == Returns:
+    # Array of Nodes
+    #
     def historicals
       servers.select { |node| node.type == :historical }
     end
@@ -165,11 +233,19 @@ module DruidConfig
     #
     # Returns only realtime
     #
+    # == Returns:
+    # Array of Nodes
+    #
     def realtimes
       servers.select { |node| node.type == :realtime }
     end
 
-    # workers
+    #
+    # Return all Workers (MiddleManager) of the cluster
+    #
+    # == Returns:
+    # Array of Workers
+    #
     def workers
       # Stash the base_uri
       stash_uri
@@ -192,6 +268,9 @@ module DruidConfig
       workers
     end
 
+    #
+    # URIs of the physical workers in the cluster
+    #
     def physical_workers
       @physical_workers ||= workers.map(&:host).uniq
     end
@@ -199,6 +278,13 @@ module DruidConfig
     # Services
     # -----------------
     
+    #
+    # Availabe services in the cluster
+    #
+    # == Parameters:
+    # Array of Hash with the format:
+    #   { server: [ services ], server2: [ services ], ... }
+    #
     def services
       return @services if @services
       services = {}
