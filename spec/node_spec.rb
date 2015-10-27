@@ -28,8 +28,10 @@ describe DruidConfig::Entities::Node do
                   'priority' => 0, 'segments' => @segments, 'currSize' => @size }
     
     @queue = {
-      'segmentsToLoad' => [],
-      'segmentsToDrop' => []
+      'segmentsToLoad' => 0,
+      'segmentsToDrop' => 0,
+      'segmentsToLoadSize' => 0,
+      'segmentsToDropSize' => 0
     }
   end
 
@@ -41,8 +43,8 @@ describe DruidConfig::Entities::Node do
     expect(datasource.type).to eq @type.to_sym
     expect(datasource.priority).to eq @priority
     expect(datasource.size).to eq @size
-    expect(datasource.segments_to_load).to eq []
-    expect(datasource.segments_to_drop).to eq []
+    expect(datasource.segments_to_load_count).to eq 0
+    expect(datasource.segments_to_drop_count).to eq 0
   end
 
   it 'calculate free space' do
