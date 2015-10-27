@@ -44,11 +44,11 @@ Call methods defined in `DruidConfig::Cluster` to access to the data. To get mor
 
 Some methods return an instance of an `Entity` class. These entities provide multiple methods to access data. Defined entities are inside `druid_config/entities` folder.
 
-*[DataSource]()
-*[Node]()
-*[Segment]()
-*[Tier]()
-*[Worker]()
+* [DataSource]()
+* [Node]()
+* [Segment]()
+* [Tier]()
+* [Worker]()
 
 # Collaborate
 
