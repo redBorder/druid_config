@@ -7,7 +7,7 @@ DruidConfig is a gem to access the information about Druid cluster status. You c
 To use in your application, add this line to your Gemfile:
 
 ```ruby
-require 'druid_config'
+gem 'druid_config'
 ```
 
 ## Query Druid data
