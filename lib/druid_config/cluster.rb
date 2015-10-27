@@ -136,7 +136,7 @@ module DruidConfig
     def datasources
       datasource_status = load_status
       secure_query do
-        self.class.get('/datasources?full').map do |data|
+        self.class.get('/datasources?simple').map do |data|
           DruidConfig::Entities::DataSource.new(
             data,
             datasource_status.select { |k, _| k == data['name'] }.values.first)

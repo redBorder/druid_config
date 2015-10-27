@@ -59,24 +59,27 @@ RSpec.configure do |config|
       # leader: coordinator.stub
       # datasources: datasource1, datasource2
       # tiers: _default_tier, hot
-      stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/leader')
-        .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
-        .to_return(status: 200, body: 'coordinator.stub', headers: {})
+      
+      # Load data
+      responses = YAML.load(File.read('spec/data/druid_responses.yml'))
+      head = { 'Accept' => '*/*', 'User-Agent' => 'Ruby' }
+      rhead = { 'Content-Type' => 'application/json' }
+      base = 'http://coordinator.stub/druid/coordinator/v1/'
 
-      stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/loadstatus')
-        .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
-        .to_return(status: 200, body: '{"datasource1":100.0,"datasource2":100.0}',
-                   headers: { 'Content-Type' => 'application/json' })
+      # Stub all queries to the API
+      stub_request(:get, "#{base}leader").with(headers: head)
+        .to_return(status: 200, body: responses['leader'], headers: {})
 
-      stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/loadstatus?simple')
-        .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
-        .to_return(status: 200, body: '{"datasource1":0,"datasource2":0}',
-                   headers: { 'Content-Type' => 'application/json' })
+      stub_request(:get, "#{base}loadstatus").with(headers: head)
+        .to_return(status: 200, body: responses['loadstatus'], headers: rhead)
 
-      stub_request(:get, 'http://coordinator.stub/druid/coordinator/v1/loadstatus?full')
-        .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
-        .to_return(status: 200, body: '{"_default_tier":{"datasource1":0}, "hot":{"datasource2":0}}',
-                   headers: { 'Content-Type' => 'application/json' })
+      stub_request(:get, "#{base}loadstatus?simple").with(headers: head)
+        .to_return(status: 200, body: responses['loadstatus_simple'],
+                   headers: rhead)
+
+      stub_request(:get, "#{base}loadstatus?full").with(headers: head)
+        .to_return(status: 200, body: responses['loadstatus_full'],
+                   headers: rhead)
     end
   end
 end

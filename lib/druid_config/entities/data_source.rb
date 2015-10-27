@@ -31,8 +31,8 @@ module DruidConfig
       # http://druid.io/docs/0.8.1/design/coordinator.html
       #
 
-      def info(params = '')
-        @info ||= self.class.get("/datasources/#{@name}?#{params}")
+      def info
+        @info ||= self.class.get("/datasources/#{@name}")
       end
 
       # Intervals
