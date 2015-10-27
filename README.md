@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/druid_config.svg)](https://badge.fury.io/rb/druid_config) [![Build Status](https://travis-ci.org/redBorder/druid_config.svg)](https://travis-ci.org/redBorder/druid_config)
+
 # DruidConfig
 
 DruidConfig is a gem to access the information about Druid cluster status. You can check a node capacity, number of segments, tiers... It uses [zookeeper](https://zookeeper.apache.org/) to get coordinator and overlord URIs.
