@@ -5,12 +5,18 @@ module DruidConfig
   class Cluster
     # HTTParty Rocks!
     include HTTParty
+    include DruidConfig::Util
 
     #
     # Initialize the client to perform the queris
     #
     def initialize(zk_uri, options)
+      # Initialize the Client
       DruidConfig.client = DruidConfig::Client.new(zk_uri, options)
+
+      # Used to check the number of retries on error
+      @retries = 0
+
       # Update the base uri to perform queries
       self.class.base_uri(
         "#{DruidConfig.client.coordinator}"\
@@ -22,6 +28,16 @@ module DruidConfig
     #
     def close!
       DruidConfig.client.close!
+    end
+
+    #
+    # Reset the client
+    #
+    def reset!
+      DruidConfig.client.reset!
+      self.class.base_uri(
+        "#{DruidConfig.client.coordinator}"\
+        "druid/coordinator/#{DruidConfig::Version::API_VERSION}")
     end
 
     # ------------------------------------------------------------
@@ -38,31 +54,41 @@ module DruidConfig
     # Coordinator
     # -----------------
     def leader
-      self.class.get('/leader').body
+      secure_query do
+        self.class.get('/leader').body
+      end
     end
 
     def load_status(params = '')
-      self.class.get("/loadstatus?#{params}")
+      secure_query do
+        self.class.get("/loadstatus?#{params}")
+      end
     end
 
     def load_queue(params = '')
-      self.class.get("/loadqueue?#{params}")
+      secure_query do
+        self.class.get("/loadqueue?#{params}")
+      end
     end
 
     # Metadata
     # -----------------
     def metadata_datasources(params = '')
-      self.class.get("/metadata/datasources?#{params}")
+      secure_query do
+        self.class.get("/metadata/datasources?#{params}")
+      end
     end
 
     alias_method :mt_datasources, :metadata_datasources
 
     def metadata_datasources_segments(data_source, segment = '')
       end_point = "/metadata/datasources/#{data_source}/segments"
-      if segment.empty? || segment == 'full'
-        self.class.get("#{end_point}?#{params}")
-      else
-        self.class.get("#{end_point}/#{params}")
+      secure_query do
+        if segment.empty? || segment == 'full'
+          self.class.get("#{end_point}?#{params}")
+        else
+          self.class.get("#{end_point}/#{params}")
+        end
       end
     end
 
@@ -72,10 +98,12 @@ module DruidConfig
     # -----------------
     def datasources
       datasource_status = load_status
-      self.class.get('/datasources?full').map do |data|
-        DruidConfig::Entities::DataSource.new(
-          data,
-          datasource_status.select { |k, _| k == data['name'] }.values.first)
+      secure_query do
+        self.class.get('/datasources?full').map do |data|
+          DruidConfig::Entities::DataSource.new(
+            data,
+            datasource_status.select { |k, _| k == data['name'] }.values.first)
+        end
       end
     end
 
@@ -86,7 +114,9 @@ module DruidConfig
     # Rules
     # -----------------
     def rules
-      self.class.get('/rules')
+      secure_query do
+        self.class.get('/rules')
+      end
     end
 
     # Tiers
@@ -94,26 +124,32 @@ module DruidConfig
     def tiers
       current_nodes = servers
       # Initialize tiers
-      current_nodes.map(&:tier).uniq.map do |tier|
-        DruidConfig::Entities::Tier.new(
-          tier,
-          current_nodes.select { |node| node.tier == tier })
+      secure_query do
+        current_nodes.map(&:tier).uniq.map do |tier|
+          DruidConfig::Entities::Tier.new(
+            tier,
+            current_nodes.select { |node| node.tier == tier })
+        end
       end
     end
 
     # Servers
     # -----------------
     def servers
-      queue = load_queue('full')
-      self.class.get('/servers?full').map do |data|
-        DruidConfig::Entities::Node.new(
-          data,
-          queue.select { |k, _| k == data['host'] }.values.first)
+      secure_query do
+        queue = load_queue('full')
+        self.class.get('/servers?full').map do |data|
+          DruidConfig::Entities::Node.new(
+            data,
+            queue.select { |k, _| k == data['host'] }.values.first)
+        end
       end
     end
 
     def physical_servers
-      @physical_servers ||= servers.map(&:host).uniq
+      secure_query do
+        @physical_servers ||= servers.map(&:host).uniq
+      end
     end
 
     alias_method :nodes, :servers
@@ -140,12 +176,18 @@ module DruidConfig
       self.class.base_uri(
         "#{DruidConfig.client.overlord}"\
         "druid/indexer/#{DruidConfig::Version::API_VERSION}")
+      workers = []
       # Perform a query
-      workers = self.class.get('/workers').map do |worker|
-        DruidConfig::Entities::Worker.new(worker)
+      begin
+        secure_query do
+          workers = self.class.get('/workers').map do |worker|
+            DruidConfig::Entities::Worker.new(worker)
+          end
+        end
+      ensure
+        # Recover it
+        pop_uri
       end
-      # Recover it
-      pop_uri
       # Return
       workers
     end

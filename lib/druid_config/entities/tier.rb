@@ -33,6 +33,10 @@ module DruidConfig
         ((size.to_f / max_size) * 100).round(2)
       end
 
+      def historicals
+        nodes.select { |node| node.type == :historical }
+      end
+
       def segments
         @segments ||= nodes.map(&:segments)
                       .flatten.sort_by { |seg| seg.interval.first }
@@ -46,6 +50,16 @@ module DruidConfig
       def segments_to_drop
         @segments_to_drop ||=
           nodes.map { |node| node.segments_to_drop.count }.inject(:+)
+      end
+
+      def segments_to_load_size
+        @segments_to_load_size ||=
+          nodes.map(&:segments_to_load_size).reduce(:+)
+      end
+
+      def segments_to_drop_size
+        @segments_to_drop_size ||=
+          nodes.map(&:segments_to_drop_size).reduce(:+)
       end
     end
   end

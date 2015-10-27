@@ -9,7 +9,8 @@ module DruidConfig
 
       # Readers
       attr_reader :host, :port, :max_size, :type, :tier, :priority, :size,
-                  :segments, :segments_to_load, :segments_to_drop
+                  :segments, :segments_to_load, :segments_to_drop,
+                  :segments_to_load_size, :segments_to_drop_size
 
       #
       # Initialize it with received info
@@ -31,8 +32,8 @@ module DruidConfig
           DruidConfig::Entities::Segment.new(sdata)
         end
         if queue.nil?
-          @segments_to_load = []
-          @segments_to_drop = []
+          @segments_to_load, @segments_to_drop = [], []
+          @segments_to_load_size, @segments_to_drop_size = 0, 0
         else
           @segments_to_load = queue['segmentsToLoad'].map do |segment|
             DruidConfig::Entities::Segment.new(segment)
@@ -40,6 +41,8 @@ module DruidConfig
           @segments_to_drop = queue['segmentsToDrop'].map do |segment|
             DruidConfig::Entities::Segment.new(segment)
           end
+          @segments_to_load_size = @segments_to_load.map(&:size).reduce(:+)
+          @segments_to_drop_size = @segments_to_drop.map(&:size).reduce(:+)
         end
       end
 

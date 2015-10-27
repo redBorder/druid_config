@@ -4,6 +4,7 @@ require 'httparty'
 # Classes
 require 'druid_config/zk'
 require 'druid_config/version'
+require 'druid_config/util'
 require 'druid_config/entities/segment'
 require 'druid_config/entities/worker'
 require 'druid_config/entities/node'
@@ -14,6 +15,11 @@ require 'druid_config/client'
 
 # Base namespace of the gem
 module DruidConfig
+  #
+  # Exception class for an error to connect the API
+  #
+  class DruidApiError < StandardError; end
+  
   # Global client of Druidconfig module
   @client = nil
 
