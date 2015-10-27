@@ -50,6 +50,10 @@ Some methods return an instance of an `Entity` class. These entities provide mul
 * [Tier]()
 * [Worker]()
 
+## Exceptions
+
+Sometimes the Gem can't access to Druid API. In this case, the gem automatically will reset the Zookeeper connection and retry the query. If second query fails too, a `DruidApiError` exception will be raised.
+
 # Collaborate
 
 To contribute DruidConfig:
