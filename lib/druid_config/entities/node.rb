@@ -6,10 +6,11 @@ module DruidConfig
     class Node
       # HTTParty Rocks!
       include HTTParty
+      include DruidConfig::Util
 
       # Readers
       attr_reader :host, :port, :max_size, :type, :tier, :priority, :size,
-                  :segments, :segments_to_load, :segments_to_drop,
+                  :segments, :segments_to_load_count, :segments_to_drop_count,
                   :segments_to_load_size, :segments_to_drop_size
 
       #
@@ -28,21 +29,20 @@ module DruidConfig
         @tier = metadata['tier']
         @priority = metadata['priority']
         @size = metadata['currSize']
-        @segments = metadata['segments'].map do |_, sdata|
-          DruidConfig::Entities::Segment.new(sdata)
-        end
+        # Set end point for HTTParty
+        self.class.base_uri(
+          "#{DruidConfig.client.coordinator}"\
+          "druid/coordinator/#{DruidConfig::Version::API_VERSION}")
+
+        # Load more data from queue
         if queue.nil?
-          @segments_to_load, @segments_to_drop = [], []
+          @segments_to_load_count, @segments_to_drop_count = 0, 0
           @segments_to_load_size, @segments_to_drop_size = 0, 0
         else
-          @segments_to_load = queue['segmentsToLoad'].map do |segment|
-            DruidConfig::Entities::Segment.new(segment)
-          end
-          @segments_to_drop = queue['segmentsToDrop'].map do |segment|
-            DruidConfig::Entities::Segment.new(segment)
-          end
-          @segments_to_load_size = @segments_to_load.map(&:size).reduce(:+)
-          @segments_to_drop_size = @segments_to_drop.map(&:size).reduce(:+)
+          @segments_to_load_count = queue['segmentsToLoad']
+          @segments_to_drop_count = queue['segmentsToDrop']
+          @segments_to_load_size = queue['segmentsToLoadSize']
+          @segments_to_drop_size = queue['segmentsToLoadSize']
         end
       end
 
@@ -64,10 +64,50 @@ module DruidConfig
       end
 
       #
+      # Return all segments of this node
+      #
+      def segments
+        @segments ||=
+          self.class.get("/servers/#{uri}/segments?full").map do |s|
+            DruidConfig::Entities::Segment.new(s)
+          end
+      end
+
+      #
+      # Get segments to load
+      #
+      def segments_to_load
+        queue['segmentsToLoad'].map do |segment|
+          DruidConfig::Entities::Segment.new(segment)
+        end
+      end
+
+      #
+      # Get segments to drop
+      #
+      def segments_to_drop
+        queue['segmentsToDrop'].map do |segment|
+          DruidConfig::Entities::Segment.new(segment)
+        end
+      end
+
+      #
       # Return the URI of this node
       #
       def uri
         "#{@host}:#{@port}"
+      end
+
+      private
+
+      #
+      # Get load queue for this node
+      #
+      def queue
+        secure_query do
+          self.class.get('/loadqueue?full')
+            .select { |k, _| k == uri }.values.first
+        end
       end
     end
   end

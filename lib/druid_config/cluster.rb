@@ -202,8 +202,8 @@ module DruidConfig
     #
     def servers
       secure_query do
-        queue = load_queue('full')
-        self.class.get('/servers?full').map do |data|
+        queue = load_queue('simple')
+        self.class.get('/servers?simple').map do |data|
           DruidConfig::Entities::Node.new(
             data,
             queue.select { |k, _| k == data['host'] }.values.first)

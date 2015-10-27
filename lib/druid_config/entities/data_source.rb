@@ -8,6 +8,7 @@ module DruidConfig
     class DataSource
       # HTTParty Rocks!
       include HTTParty
+      include DruidConfig::Util
 
       attr_reader :name, :properties, :load_status
 
@@ -32,27 +33,35 @@ module DruidConfig
       #
 
       def info
-        @info ||= self.class.get("/datasources/#{@name}")
+        secure_query do
+          @info ||= self.class.get("/datasources/#{@name}")
+        end
       end
 
       # Intervals
       # -----------------
       def intervals(params = '')
-        self.class.get("/datasources/#{@name}/intervals?#{params}")
+        secure_query do
+          self.class.get("/datasources/#{@name}/intervals?#{params}")
+        end
       end
 
       def interval(interval, params = '')
-        self.class.get("/datasources/#{@name}/intervals/#{interval}"\
-                       "?#{params}")
+        secure_query do
+          self.class.get("/datasources/#{@name}/intervals/#{interval}"\
+                         "?#{params}")
+        end
       end
 
       # Segments and Tiers
       # -----------------
       def segments
-        @segments ||=
-          self.class.get("/datasources/#{@name}/segments?full").map do |s|
-            DruidConfig::Entities::Segment.new(s)
-          end
+        secure_query do
+          @segments ||=
+            self.class.get("/datasources/#{@name}/segments?full").map do |s|
+              DruidConfig::Entities::Segment.new(s)
+            end
+        end
       end
 
       def segment(segment)
@@ -66,12 +75,16 @@ module DruidConfig
       # Rules
       # -----------------
       def rules(params = '')
-        self.class.get("/rules/#{@name}?#{params}")
+        secure_query do
+          self.class.get("/rules/#{@name}?#{params}")
+        end
       end
 
       def history_rules(interval)
-        self.class.get("/rules/#{@name}/history"\
-                       "?interval=#{interval}")
+        secure_query do
+          self.class.get("/rules/#{@name}/history"\
+                         "?interval=#{interval}")
+        end
       end
     end
   end
