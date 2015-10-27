@@ -10,6 +10,10 @@ To use in your application, add this line to your Gemfile:
 require 'druid_config'
 ```
 
+## Query Druid data
+
+The purpose of this gem is to query Druid cluster status. If you want to query Druid data, I recommend you to use [ruby-druid gem](https://github.com/ruby-druid/ruby-druid).
+
 # Initialization
 
 `Cluster` is the base class to perform queries. To initialize it send the Zookeeper URI and options as arguments:

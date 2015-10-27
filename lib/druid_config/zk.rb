@@ -1,3 +1,9 @@
+#
+# This Class is an adaptation from ZK Class of ruby-druid gem.
+# Please, check the following link:
+#   https://github.com/ruby-druid/ruby-druid/blob/master/lib/druid/zk.rb
+#
+
 require 'zk'
 require 'rest_client'
 
