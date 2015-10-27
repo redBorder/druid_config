@@ -5,4 +5,4 @@ rvm:
   - 1.9.3
 gemfile:
   - Gemfile
-script: bundle exec rspec
+script: MOCK_DRUID=true bundle exec rspec
