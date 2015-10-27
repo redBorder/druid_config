@@ -46,11 +46,11 @@ Call methods defined in `DruidConfig::Cluster` to access to the data. To get mor
 
 Some methods return an instance of an `Entity` class. These entities provide multiple methods to access data. Defined entities are inside `druid_config/entities` folder.
 
-* [DataSource]()
-* [Node]()
-* [Segment]()
-* [Tier]()
-* [Worker]()
+* [DataSource](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/data_source.rb)
+* [Segment](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/segment.rb)
+* [Tier](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/tier.rb)
+* [Node](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/node.rb)
+* [Worker](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/worker.rb)
 
 ## Exceptions
 
