@@ -42,14 +42,28 @@ module DruidConfig
                       .flatten.sort_by { |seg| seg.interval.first }
       end
 
+      def segments_count
+        @segments_count ||= nodes.map(&:segments_count).inject(:+)
+      end
+
       def segments_to_load
-        @segments_to_load ||=
-          nodes.map { |node| node.segments_to_load.count }.inject(:+)
+        @segments_to_load ||= nodes.map(&:segments_to_load)
+                              .flatten.sort_by { |seg| seg.interval.first }
       end
 
       def segments_to_drop
-        @segments_to_drop ||=
-          nodes.map { |node| node.segments_to_drop.count }.inject(:+)
+        @segments_to_drop ||= nodes.map(&:segments_to_drop)
+                              .flatten.sort_by { |seg| seg.interval.first }
+      end
+
+      def segments_to_load_count
+        @segments_to_load_count ||=
+          nodes.map(&:segments_to_load_count).inject(:+)
+      end
+
+      def segments_to_drop_count
+        @segments_to_drop_count ||=
+          nodes.map(&:segments_to_drop_count).inject(:+)
       end
 
       def segments_to_load_size

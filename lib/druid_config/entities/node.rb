@@ -10,7 +10,7 @@ module DruidConfig
 
       # Readers
       attr_reader :host, :port, :max_size, :type, :tier, :priority, :size,
-                  :segments, :segments_to_load_count, :segments_to_drop_count,
+                  :segments_to_load_count, :segments_to_drop_count,
                   :segments_to_load_size, :segments_to_drop_size
 
       #
@@ -66,6 +66,14 @@ module DruidConfig
       #
       # Return all segments of this node
       #
+      def segments_count
+        @segments_count ||=
+          self.class.get("/servers/#{uri}/segments").size
+      end
+
+      #
+      # Return all segments of this node
+      #
       def segments
         @segments ||=
           self.class.get("/servers/#{uri}/segments?full").map do |s|
@@ -77,7 +85,9 @@ module DruidConfig
       # Get segments to load
       #
       def segments_to_load
-        queue['segmentsToLoad'].map do |segment|
+        current_queue = queue
+        return [] unless current_queue
+        current_queue['segmentsToLoad'].map do |segment|
           DruidConfig::Entities::Segment.new(segment)
         end
       end
@@ -86,7 +96,9 @@ module DruidConfig
       # Get segments to drop
       #
       def segments_to_drop
-        queue['segmentsToDrop'].map do |segment|
+        current_queue = queue
+        return [] unless current_queue
+        current_queue['segmentsToDrop'].map do |segment|
           DruidConfig::Entities::Segment.new(segment)
         end
       end
