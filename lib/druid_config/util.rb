@@ -31,5 +31,39 @@ module DruidConfig
         retry
       end
     end
+
+    #
+    # Update the URI of HTTParty to perform queries to Overlord.
+    # After perform the query, the URI is reverted to coordinator.
+    #
+    def query_overlord
+      return unless block_given?
+      stash_uri
+      self.class.base_uri(
+        "#{DruidConfig.client.overlord}"\
+        "druid/indexer/#{DruidConfig::Version::API_VERSION}")
+      begin
+        yield
+      ensure
+        # Ensure we revert the URI
+        pop_uri
+      end
+    end
+
+    #
+    # Stash current base_uri
+    #
+    def stash_uri
+      @uri_stack ||= []
+      @uri_stack.push self.class.base_uri
+    end
+
+    #
+    # Pop next base_uri
+    #
+    def pop_uri
+      return if @uri_stack.nil? || @uri_stack.empty?
+      self.class.base_uri(@uri_stack.pop)
+    end
   end
 end

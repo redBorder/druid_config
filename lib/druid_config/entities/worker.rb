@@ -21,7 +21,11 @@ module DruidConfig
         @capacity = metadata['worker']['capacity']
         @version = metadata['worker']['version']
         @last_completed_task_time = metadata['lastCompletedTaskTime']
-        @running_tasks = metadata['runningTasks']
+        @running_tasks = metadata['runningTasks'].map do |task|
+          DruidConfig::Entities::Task.new(
+            task,
+            DruidConfig::Entities::Task::STATUS[:running])
+        end
         @capacity_used = metadata['currCapacityUsed']
       end
 

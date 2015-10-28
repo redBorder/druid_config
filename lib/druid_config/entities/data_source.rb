@@ -1,6 +1,6 @@
 module DruidConfig
   #
-  # Module of info
+  # Module of Entities
   #
   module Entities
     #

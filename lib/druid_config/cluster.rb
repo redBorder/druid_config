@@ -253,22 +253,14 @@ module DruidConfig
     # Array of Workers
     #
     def workers
-      # Stash the base_uri
-      stash_uri
-      self.class.base_uri(
-        "#{DruidConfig.client.overlord}"\
-        "druid/indexer/#{DruidConfig::Version::API_VERSION}")
       workers = []
       # Perform a query
-      begin
+      query_overlord do
         secure_query do
           workers = self.class.get('/workers').map do |worker|
             DruidConfig::Entities::Worker.new(worker)
           end
         end
-      ensure
-        # Recover it
-        pop_uri
       end
       # Return
       workers
@@ -279,6 +271,47 @@ module DruidConfig
     #
     def physical_workers
       @physical_workers ||= workers.map(&:host).uniq
+    end
+
+    # Tasks
+    # -----------------
+    
+    #
+    # Return tasks based on the status
+    #
+    # == Returns:
+    # Array of Tasks
+    #
+    %w(running pending waiting).each do |status|
+      define_method("#{status}_tasks") do
+        tasks = []
+        query_overlord do
+          tasks = self.class.get("/#{status}Tasks").map do |task|
+            DruidConfig::Entities::Task.new(
+              task['id'],
+              DruidConfig::Entities::Task::STATUS[status.to_sym],
+              created_time: task['createdTime'],
+              query_insertion_time: task['queueInsertionTime'])
+          end
+        end
+      end
+    end
+    
+    #
+    # Return complete tasks
+    #
+    # == Returns:
+    # Array of Tasks
+    #
+    def complete_tasks
+      tasks = []
+      query_overlord do
+        tasks = self.class.get('/completeTasks').map do |task|
+          DruidConfig::Entities::Task.new(
+            task['id'],
+            task['statusCode'])
+        end
+      end
     end
 
     # Services
@@ -301,24 +334,6 @@ module DruidConfig
       physical_workers.each { |w| services[w] << :middleManager }
       # Return nodes
       @services = services
-    end
-
-    private
-
-    #
-    # Stash current base_uri
-    #
-    def stash_uri
-      @uri_stack ||= []
-      @uri_stack.push self.class.base_uri
-    end
-
-    #
-    # Pop next base_uri
-    #
-    def pop_uri
-      return if @uri_stack.nil? || @uri_stack.empty?
-      self.class.base_uri(@uri_stack.pop)
     end
   end
 end
