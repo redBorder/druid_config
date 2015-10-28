@@ -37,7 +37,7 @@ module DruidConfig
       # Return free capacity
       #
       def free
-        @free ||= (capacity - current_capacity_used)
+        @free ||= (capacity - capacity_used)
       end
 
       #
