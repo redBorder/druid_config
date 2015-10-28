@@ -24,7 +24,9 @@ module DruidConfig
         @running_tasks = metadata['runningTasks'].map do |task|
           DruidConfig::Entities::Task.new(
             task,
-            DruidConfig::Entities::Task::STATUS[:running])
+            DruidConfig::Entities::Task::STATUS[:running],
+            created_time: task['createdTime'],
+            query_insertion_time: task['queueInsertionTime'])
         end
         @capacity_used = metadata['currCapacityUsed']
       end
