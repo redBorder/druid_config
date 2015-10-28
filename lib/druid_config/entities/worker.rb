@@ -6,7 +6,7 @@ module DruidConfig
     class Worker
       # Readers
       attr_reader :last_completed_task_time, :host, :port, :ip, :capacity,
-                   :version, :running_tasks, :current_capacity_used
+                  :version, :running_tasks, :capacity_used
 
       #
       # Initialize it with received info
