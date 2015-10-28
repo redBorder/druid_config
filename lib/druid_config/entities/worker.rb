@@ -41,7 +41,7 @@ module DruidConfig
       #
       # Return capacity used
       #
-      def used
+      def used_percent
         return 0 unless @capacity && @capacity != 0
         ((@capacity_used.to_f / @capacity) * 100).round(2)
       end
