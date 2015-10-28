@@ -31,7 +31,7 @@ module DruidConfig
         @capacity_used = metadata['currCapacityUsed']
       end
 
-      alias_method :used, :capacity
+      alias_method :used, :capacity_used
 
       #
       # Return free capacity
