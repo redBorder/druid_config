@@ -22,6 +22,19 @@ module DruidConfig
       attr_reader :id, :status, :created_time, :query_insertion_time
 
       #
+      # Find a task based on id
+      #
+      def self.find(id)
+        # Set end point for HTTParty
+        base_uri(
+          "#{DruidConfig.client.overlord}"\
+          "druid/indexer/#{DruidConfig::Version::API_VERSION}/task")
+        # Get data
+        status = get("/#{id}/status")
+        new(id, status['status']['status'])
+      end
+
+      #
       # Initialize a task
       #
       # == Parameters:
@@ -35,7 +48,6 @@ module DruidConfig
         @status = status.downcase.to_sym
         @created_time = extended_info[:created_time]
         @query_insertion_time = extended_info[:query_insertion_time]
-
         # Set end point for HTTParty
         self.class.base_uri(
           "#{DruidConfig.client.overlord}"\
@@ -58,6 +70,13 @@ module DruidConfig
       #
       def payload
         @payload ||= self.class.get("/#{@id}")['payload']
+      end
+
+      #
+      # Current log of a task
+      #
+      def log
+        self.class.get("/#{@id}/log")
       end
 
       #

@@ -296,6 +296,13 @@ module DruidConfig
         end
       end
     end
+
+    #
+    # Find a task
+    #
+    def task(id)
+      DruidConfig::Entities::Task.find(id)
+    end
     
     #
     # Return complete tasks
