@@ -321,6 +321,20 @@ module DruidConfig
       end
     end
 
+    #
+    # Return failed completed tasks
+    #
+    def failed_tasks
+      complete_tasks.select(&:failed?)
+    end
+
+    #
+    # Return success completed tasks
+    #
+    def success_tasks
+      complete_tasks.select(&:success?)
+    end
+
     # Services
     # -----------------
     
