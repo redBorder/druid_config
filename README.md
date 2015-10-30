@@ -44,6 +44,8 @@ Call methods defined in `DruidConfig::Cluster` to access to the data. To get mor
 * `realtimes`: realtime nodes
 * `workers`: worker nodes
 * `physical_workers`: array of URIs of worker nodes
+* `running_tasks`, `pending_tasks`, `waiting_tasks`, `complete_tasks`: tasks in the cluster based in their status
+* `task`: load a task based on an identifier
 * `services`: Hash with physical nodes and the services they are running
 
 ## Entities
@@ -55,6 +57,7 @@ Some methods return an instance of an `Entity` class. These entities provide mul
 * [Tier](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/tier.rb)
 * [Node](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/node.rb)
 * [Worker](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/worker.rb)
+* [Task](https://github.com/redBorder/druid_config/blob/master/lib/druid_config/entities/task.rb)
 
 ## Exceptions
 
