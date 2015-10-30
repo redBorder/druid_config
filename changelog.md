@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.2.0] - 30-10-2015
+
+- Improved worker class with new methods to calculate capacity
+- Fixed some bugs on cluster class
+- Improve response time by loading segments, segments\_to\_load and segments\_to\_drop on demand
+- Added method to cluster to return all tasks or filter them by status
+- Created task entity.
+
 ## [0.1.0] - 27-10-2015
 
 - Integrate with Travis CI
