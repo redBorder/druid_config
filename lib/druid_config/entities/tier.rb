@@ -25,7 +25,8 @@ module DruidConfig
       end
 
       def free
-        @free ||= (max_size - size)
+        return @free if @free
+        @free = (max_size - size) > 0 ? (max_size - size) : 0
       end
 
       def used_percent

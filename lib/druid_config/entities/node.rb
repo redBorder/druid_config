@@ -60,7 +60,8 @@ module DruidConfig
       # Calculate free space
       #
       def free
-        max_size - size
+        return @free if @free
+        @free = (max_size - size) > 0 ? (max_size - size) : 0
       end
 
       #
