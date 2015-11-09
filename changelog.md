@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Prerelase
+
+- Protect free memory against negative values.
+
 ## [0.2.0] - 30-10-2015
 
 - Improved worker class with new methods to calculate capacity
