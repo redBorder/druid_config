@@ -70,18 +70,18 @@ module DruidConfig
       #
       # Functions to check the rule type
       #
-      %i(drop load).each do |rule|
+      %w(drop load).each do |rule|
         define_method("#{rule}?") do
-          @rule_type == rule
+          @rule_type == rule.to_sym
         end
       end
 
       #
       # Functions to check how rule time is defined
       #
-      %i(interval forever period).each do |time|
+      %w(interval forever period).each do |time|
         define_method("#{time}?") do
-          @type == time
+          @type == time.to_sym
         end
       end
 
