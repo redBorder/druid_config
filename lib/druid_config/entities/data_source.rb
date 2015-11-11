@@ -75,7 +75,7 @@ module DruidConfig
       # Rules
       # -----------------
       def rules(params = '')
-        rules = []
+        rules =  DruidConfig::Entities::RuleCollection.new
         secure_query do
           self.class.get("/rules/#{@name}?#{params}").each do |rule|
             rules << DruidConfig::Entities::Rule.parse(name, rule)
