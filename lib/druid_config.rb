@@ -1,11 +1,13 @@
 # Global library
 require 'httparty'
+require 'iso8601'
 
 # Classes
 require 'druid_config/zk'
 require 'druid_config/version'
 require 'druid_config/util'
 require 'druid_config/entities/segment'
+require 'druid_config/entities/rule'
 require 'druid_config/entities/task'
 require 'druid_config/entities/worker'
 require 'druid_config/entities/node'

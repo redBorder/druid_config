@@ -75,9 +75,13 @@ module DruidConfig
       # Rules
       # -----------------
       def rules(params = '')
+        rules = []
         secure_query do
-          self.class.get("/rules/#{@name}?#{params}")
+          self.class.get("/rules/#{@name}?#{params}").each do |rule|
+            rules << DruidConfig::Entities::Rule.parse(name, rule)
+          end
         end
+        rules
       end
 
       def history_rules(interval)

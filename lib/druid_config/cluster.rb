@@ -165,9 +165,16 @@ module DruidConfig
     # Return the rules applied to a cluster
     #
     def rules
+      rules = []
       secure_query do
-        self.class.get('/rules')
+        self.class.get('/rules').each do |datasource, ds_rules|
+          ds_rules.each do |rule|
+            rules << DruidConfig::Entities::Rule.parse(datasource, rule)
+          end
+        end
       end
+      # Return initialized rules
+      rules
     end
 
     # Tiers
