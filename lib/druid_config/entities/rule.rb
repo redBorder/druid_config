@@ -5,8 +5,13 @@ module DruidConfig
     #
     class Rule
       # Variables
-      attr_reader :datasource, :type, :rule_type, :replicants, :period,
+      attr_reader :datasource, :type, :time_type, :replicants, :period,
                   :interval
+
+      # Identifier for type
+      FOREVER_DRUID_STRING = 'Forever'
+      INTERVAL_DRUID_STRING = 'ByInterval'
+      PERIOD_DRUID_STRING = 'ByPeriod'
 
       #
       # Parse data from a Druid API response an initialize an object of
@@ -22,15 +27,15 @@ module DruidConfig
       # Rule instance
       #
       def self.parse(datasource, data)
-        rule_type, type = detect_type(data['type'])
+        type, time_type = detect_type(data['type'])
         options = { replicants: data['tieredReplicants'] }
-        if type == :period
+        if time_type == :period
           options.merge!(period: data['period'])
-        elsif type == :interval
+        elsif time_type == :interval
           options.merge!(interval: data['interval'])
         end
         # Instance the class
-        new(datasource, rule_type, type, options)
+        new(datasource, type, time_type, options)
       end
 
       #
@@ -41,23 +46,23 @@ module DruidConfig
       # == Parameters:
       # datasource::
       #   String with the name of the data source
-      # rule_type::
-      #   Type of the rule, it can be :drop or :load
       # type::
+      #   Type of the rule, it can be :drop or :load
+      # time_type::
       #   Time reference. It can be :forever, :period or :interval
       # options::
       #   Hash with extra data to the rules.
       #     - replicants: Hash with format
-      #         { 'tier' >= NumberOfReplicants, 'tier' => ... }
+      #         { 'tier' => NumberOfReplicants, 'tier' => ... }
       #     - period: String with a period in ISO8601 format.
       #               Only available when type is :period.
       #     - interval: String with a interval in ISO8601 format.
       #                 Only available when type is :interval.
       #
-      def initialize(datasource, rule_type, type, options = {})
+      def initialize(datasource, type, time_type, options = {})
         @datasource = datasource
-        @rule_type = rule_type
         @type = type
+        @time_type = time_type
         @replicants = options[:replicants]
         if period?
           @period = ISO8601::Duration.new(options[:period])
@@ -72,7 +77,7 @@ module DruidConfig
       #
       %w(drop load).each do |rule|
         define_method("#{rule}?") do
-          @rule_type == rule.to_sym
+          @type == rule.to_sym
         end
       end
 
@@ -81,8 +86,35 @@ module DruidConfig
       #
       %w(interval forever period).each do |time|
         define_method("#{time}?") do
-          @type == time.to_sym
+          @time_type == time.to_sym
         end
+      end
+
+      #
+      # Return the rule as Hash format
+      #
+      # == Returns:
+      # Hash
+      #
+      def to_h
+        base = { type: type_to_druid, tieredReplicants: @replicants }
+        if period?
+          base.merge(period: @period.to_s)
+        elsif interval?
+          base.merge(interval: @interval.to_s)
+        else
+          base
+        end
+      end
+
+      #
+      # Return the rule as valid JSON for Druid
+      #
+      # == Returns:
+      # JSON String
+      #
+      def to_json
+        to_h.to_json
       end
 
       #
@@ -90,20 +122,39 @@ module DruidConfig
       # detect if is a drop/load rule and how it defines time.
       #
       # == Parameters:
-      # type::
+      # type_to_parse::
       #   String with the content of type field
       #
-      def self.detect_type(type)
-        rule_type = type.starts_with?('drop') ? :drop : :load
-        type = case type.gsub(rule_type.to_s, '')
-               when 'ByInterval'
-                 :interval
-               when 'Forever'
-                 :forever
-               when 'ByPeriod'
-                 :period
+      def self.detect_type(type_to_parse)
+        type = type_to_parse.starts_with?('drop') ? :drop : :load
+        time_type = case type_to_parse.gsub(type.to_s, '')
+                    when INTERVAL_DRUID_STRING
+                      :interval
+                    when FOREVER_DRUID_STRING
+                      :forever
+                    when PERIOD_DRUID_STRING
+                      :period
+                    end
+        [type, time_type]
+      end
+
+      private
+
+      #
+      # Convert the type to an String Druid can identify
+      #
+      # == Returns:
+      # String with the type of the rule
+      #
+      def type_to_druid
+        time = if period?
+                 PERIOD_DRUID_STRING
+               elsif interval?
+                 INTERVAL_DRUID_STRING
+               else
+                 FOREVER_DRUID_STRING
                end
-        [rule_type, type]
+        "#{@type}#{time}"
       end
     end
   end

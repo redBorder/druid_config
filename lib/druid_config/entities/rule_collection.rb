@@ -24,6 +24,41 @@ module DruidConfig
         # TODO: implement this method
         true
       end
+
+      #
+      # Return the collection of rules as a valid JSON for Druid
+      #
+      # == Parameters:
+      # include_datasources::
+      #   True if you want to include the name of the datasources as keys
+      #   (False by default)
+      #
+      # == Returns:
+      # JSON String
+      #
+      def to_json(include_datasources = false)
+        return to_json_with_datasources if include_datasources
+        map(&:to_h).to_json
+      end
+
+      private
+
+      #
+      # Return a JSON string with the datasources and the rules associated to
+      # them
+      #
+      # == Returns:
+      # JSON string with format:
+      #   { 'datasource' => [ { "type" => ... }, ...], 'datasource2' => [...] }
+      #
+      def to_json_with_datasources
+        rules_with_ds = {}
+        map do |rule|
+          rules_with_ds[rule.datasource] ||= []
+          rules_with_ds[rule.datasource] << rule.to_h
+        end
+        rules_with_ds.to_json
+      end
     end
   end
 end
