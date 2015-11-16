@@ -75,13 +75,43 @@ module DruidConfig
       # Rules
       # -----------------
       def rules(params = '')
-        rules =  DruidConfig::Entities::RuleCollection.new
+        return @rules if @rules
+        @rules = DruidConfig::Entities::RuleCollection.new
         secure_query do
           self.class.get("/rules/#{@name}?#{params}").each do |rule|
-            rules << DruidConfig::Entities::Rule.parse(name, rule)
+            @rules << DruidConfig::Entities::Rule.parse(rule)
           end
         end
-        rules
+        @rules
+      end
+
+      #
+      # Apply given rules to the datasource
+      #
+      # == Paremeters:
+      # rules::
+      #   RuleCollection of rules
+      #
+      # == Returns:
+      # Boolean indicating the status of the request
+      #
+      def update_rules(new_rules)
+        if post_rules(new_rules)
+          @rules = new_rules
+          true
+        else
+          false
+        end
+      end
+
+      #
+      # Save current rules
+      #
+      # == Returns:
+      # Boolean indicating the status of the request
+      #
+      def save_rules
+        post_rules(rules)
       end
 
       def history_rules(interval)
@@ -89,6 +119,31 @@ module DruidConfig
           self.class.get("/rules/#{@name}/history"\
                          "?interval=#{interval}")
         end
+      end
+
+      private
+
+      #
+      # Save rules of this data source
+      #
+      # == Paremeters:
+      # rules::
+      #   RuleCollection of rules
+      #
+      # == Returns:
+      # Boolean indicating the status of the request
+      #
+      def post_rules(new_rules)
+        fail(ArgumentError, 'Rules must be a RuleCollection instance') unless
+          new_rules.is_a?(RuleCollection)
+        uri = URI("#{self.class.base_uri}/rules/#{name}")
+        http = Net::HTTP.new(uri.host, uri.port)
+        request = Net::HTTP::Post.new(uri.request_uri)
+        request['Content-Type'] = 'application/json'
+        request.body = new_rules.map(&:to_h).to_json
+        response = http.request(request)
+        # Check statys
+        response.code.to_i == 200
       end
     end
   end

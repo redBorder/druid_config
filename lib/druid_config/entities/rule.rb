@@ -26,16 +26,17 @@ module DruidConfig
       # == Returns:
       # Rule instance
       #
-      def self.parse(datasource, data)
+      def self.parse(data, datasource = nil)
         type, time_type = detect_type(data['type'])
         options = { replicants: data['tieredReplicants'] }
+        options.merge!(datasource: datasource) if datasource
         if time_type == :period
           options.merge!(period: data['period'])
         elsif time_type == :interval
           options.merge!(interval: data['interval'])
         end
         # Instance the class
-        new(datasource, type, time_type, options)
+        new(type, time_type, options)
       end
 
       #
@@ -58,11 +59,12 @@ module DruidConfig
       #               Only available when type is :period.
       #     - interval: String with a interval in ISO8601 format.
       #                 Only available when type is :interval.
+      #     - datasource: Name of the datasource
       #
-      def initialize(datasource, type, time_type, options = {})
-        @datasource = datasource
+      def initialize(type, time_type, options = {})
         @type = type
         @time_type = time_type
+        @datasource = options[:datasource]
         @replicants = options[:replicants]
         if period?
           @period = ISO8601::Duration.new(options[:period])
@@ -97,7 +99,8 @@ module DruidConfig
       # Hash
       #
       def to_h
-        base = { type: type_to_druid, tieredReplicants: @replicants }
+        base = { type: type_to_druid }
+        base.merge!(tieredReplicants: @replicants) if @replicants
         if period?
           base.merge(period: @period.to_s)
         elsif interval?

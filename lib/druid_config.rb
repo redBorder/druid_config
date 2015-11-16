@@ -3,6 +3,7 @@ require 'httparty'
 require 'iso8601'
 require 'delegate'
 require 'json'
+require 'net/http'
 
 # Classes
 require 'druid_config/zk'

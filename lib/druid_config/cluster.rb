@@ -169,7 +169,7 @@ module DruidConfig
       secure_query do
         self.class.get('/rules').each do |datasource, ds_rules|
           ds_rules.each do |rule|
-            rules << DruidConfig::Entities::Rule.parse(datasource, rule)
+            rules << DruidConfig::Entities::Rule.parse(rule, datasource)
           end
         end
       end
