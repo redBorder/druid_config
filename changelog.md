@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Prerelase
 
 - Protect free memory against negative values.
+- Create Rule entity
+- Create RuleCollection entity
+- Added a method to udpate rules of a datasource
 
 ## [0.2.0] - 30-10-2015
 
