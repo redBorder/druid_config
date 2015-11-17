@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Prerelase
+## [0.3.0] - 17-12-2015
 
 - Protect free memory against negative values.
 - Create Rule entity
