@@ -158,6 +158,17 @@ module DruidConfig
       datasources.select { |el| el.name == datasource }
     end
 
+    #
+    # Return default datasource. This datasource hasn't got metadata
+    # associated. It's only used to read and apply default rules.
+    #
+    def default_datasource
+      DruidConfig::Entities::DataSource.new(
+        { 'name' => DruidConfig::Entities::DataSource::DEFAULT_DATASOURCE,
+          'properties' => {} },
+        {})
+    end
+
     # Rules
     # -----------------
     

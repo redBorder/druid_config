@@ -12,6 +12,9 @@ module DruidConfig
 
       attr_reader :name, :properties, :load_status
 
+      # Name of default datasource
+      DEFAULT_DATASOURCE = '_default'.freeze
+
       #
       # Initialize a DataSource
       #
