@@ -2,7 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.3.0] - 17-12-2015
+## [0.4.0] - 24-11-2015
+
+- Fixed verify_node function to retry to connect /status end point three times before ignore the node.
+- Don't store old nodes of a service when receive an event from a Zookeeper watcher
+- Raise a `DruidConfig::Exceptions::NotAvailableNodes` when there aren't any available
+- Fixed an error on `Client` that cause an error when call `.reset` method
+
+
+## [0.3.0] - 17-11-2015
 
 - Protect free memory against negative values.
 - Create Rule entity

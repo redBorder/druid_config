@@ -34,6 +34,7 @@ module DruidConfig
       @registry = Hash.new { |hash, key| hash[key] = [] }
       @discovery_path = opts[:discovery_path] || '/discovery'
       @watched_services = {}
+      @verify_retry = 0
       register
     end
 
@@ -84,8 +85,7 @@ module DruidConfig
     def random_node(service)
       return nil if @registry[service].size == 0
       # Return a random broker from available brokers
-      i = Random.rand(@registry[service].size)
-      @registry[service][i][:uri]
+      @registry[service].sample[:uri]
     end
 
     #
@@ -94,7 +94,7 @@ module DruidConfig
     def register_service(service, brokers)
       $log.info("druid.zk register", service: service, brokers: brokers) if $log
       # poor mans load balancing
-      @registry[service] = brokers.shuffle
+      @registry[service] = brokers
     end
 
     #
@@ -146,7 +146,9 @@ module DruidConfig
     end
 
     #
-    # Verify is a Coordinator is available
+    # Verify is a Coordinator is available. To do check, this method perform a
+    # GET request to the /status end point. This method will retry to connect
+    # three times with a delay of 0.8, 1.6, 2.4 seconds.
     #
     # == Parameters:
     # name::
@@ -162,6 +164,7 @@ module DruidConfig
       info = @zk.get("#{watch_path(service)}/#{name}")
       node = JSON.parse(info[0])
       uri = "http://#{node['address']}:#{node['port']}/"
+      # Try to get /status
       check = RestClient::Request.execute(
         method: :get, url: "#{uri}status",
         timeout: 5, open_timeout: 5
@@ -169,43 +172,59 @@ module DruidConfig
       $log.info("druid.zk verified", uri: uri, sources: check) if $log
       return uri if check.code == 200
     rescue
-      return false
+      return false unless @verify_retry < 3
+      # Sleep some time and retry
+      @verify_retry += 1
+      sleep 0.8 * @verify_retry
+      retry
+    ensure
+      # Reset verify retries
+      @verify_retry = 0
     end
 
     #
-    # Watch path of a service
+    # Return the path of a service in Zookeeper.
+    #
+    # == Parameters:
+    # service::
+    #   String with the name of the service
     #
     def watch_path(service)
       "#{@discovery_path}/#{service}"
     end
 
     #
-    # Check a service
+    # Check a given Druid service. Now we only need to track coordinator and
+    # overlord services. This method create a watcher to the service to check
+    # changes.
+    #
+    # This method get the available nodes in the Zookeeper path. When return
+    # them, it tries to connect to /status end point to check if the node
+    # is available. After it, it store in @registry.
+    #
+    # == Parameters:
+    # service::
+    #   String with the service to check
     #
     def check_service(service)
+      # Only watch some services
       return if @watched_services.include?(service) ||
                 !SERVICES.include?(service)
-
       # Start to watch this service
       watch_service(service)
+      # New list of nodes
+      new_list = []
 
-      known = @registry[service].map { |node| node[:name] }
+      # Verify every node
       live = @zk.children(watch_path(service), watch: true)
-      new_list = @registry[service].select { |node| live.include?(node[:name]) }
-      $log.info("druid.zk checking", service: service, known: known, live: live, new_list: new_list) if $log
-
-      # verify the new entries to be living brokers
-      (live - known).each do |name|
+      live.each do |name|
+        # Verify a node
         uri = verify_node(name, service)
+        # If != false store the URI
         new_list.push(name: name, uri: uri) if uri
       end
-
-      if new_list.empty?
-        # don't show services w/o active brokers
-        unregister_service(service)
-      else
-        register_service(service, new_list)
-      end
+      # Register new service in the registry
+      register_service(service, new_list)
     end
 
     #
