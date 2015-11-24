@@ -23,11 +23,6 @@ require 'druid_config/client'
 
 # Base namespace of the gem
 module DruidConfig
-  #
-  # Exception class for an error to connect the API
-  #
-  class DruidApiError < StandardError; end
-  
   # Global client of Druidconfig module
   @client = nil
 

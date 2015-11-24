@@ -14,5 +14,10 @@ module DruidConfig
         super("There aren't any available #{service} node")
       end
     end
+
+    #
+    # Exception class for an error to connect the API
+    #
+    class DruidApiError < StandardError; end
   end
 end

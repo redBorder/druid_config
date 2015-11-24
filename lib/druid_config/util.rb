@@ -20,12 +20,12 @@ module DruidConfig
       begin
         yield
       rescue HTTParty::RedirectionTooDeep => e
-        raise(DruidApiError, e) if @retries > 0
+        raise(DruidConfig::Exceptions::DruidApiError, e) if @retries > 0
         @retries += 1
         reset!
         retry
       rescue Errno::ECONNREFUSED => e
-        raise(DruidApiError, e) if @retries > 0
+        raise(DruidConfig::Exceptions::DruidApiError, e) if @retries > 0
         @retries += 1
         reset!
         retry

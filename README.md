@@ -61,7 +61,13 @@ Some methods return an instance of an `Entity` class. These entities provide mul
 
 ## Exceptions
 
-Sometimes the Gem can't access to Druid API. In this case, the gem automatically will reset the Zookeeper connection and retry the query. If second query fails too, a `DruidApiError` exception will be raised.
+### DruidConfig::Exceptions::NotAvailableNodes
+
+This exception will be raised when you try to perform a query to a Druid Coordinator or Overlord but there aren't any node of that type available.
+
+### DruidConfig::Exceptions::DruidApiError
+
+Sometimes the Gem have available nodes, but it can't access to Druid API. In this case, the gem automatically will reset the Zookeeper connection and retry the query. If second query fails too, a `DruidConfig::Exceptions::DruidApiError` exception will be raised.
 
 # Collaborate
 
