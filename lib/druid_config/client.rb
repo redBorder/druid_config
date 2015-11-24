@@ -9,23 +9,32 @@ module DruidConfig
     # Initialize Zookeeper connection
     #
     def initialize(zookeeper, opts = {})
-      @zookeeper = :zk
+      # Store it for future resets
+      @zookeeper = zookeeper
       @opts = opts
       @zk = ZK.new(zookeeper, opts)
     end
 
     #
-    # Get the URL of a coordinator
+    # Get the URL of a coordinator.
+    #
+    # This funciton can raise a DruidConfig::Exceptions::NotAvailableNodes
+    # exception indicating there aren't any node to process this request
     #
     def coordinator
-      zk.coordinator
+      return zk.coordinator if zk.coordinator
+      fail DruidConfig::Exceptions::NotAvailableNodes, 'coordinator'
     end
 
     #
     # Get the URI of a overlord
     #
+    # This funciton can raise a DruidConfig::Exceptions::NotAvailableNodes
+    # exception indicating there aren't any node to process this request
+    #
     def overlord
-      zk.overlord
+      return zk.overlord if zk.overlord
+      fail DruidConfig::Exceptions::NotAvailableNodes, 'overlord'
     end
 
     #
