@@ -4,7 +4,7 @@
 module DruidConfig
   module Version
     # Version of the gem
-    VERSION = '0.4.0'
+    VERSION = '0.5.0'
 
     # Base URI foor coordinator queries
     API_VERSION = 'v1'
