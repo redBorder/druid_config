@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.0] - 05-02-2016
+
+- Added `destroy` and `disable` methods to `DataSource` entity [#6](https://github.com/redBorder/druid_config/issues/6)
+
 ## [0.4.0] - 24-11-2015
 
 - Fixed verify_node function to retry to connect /status end point three times before ignore the node.
