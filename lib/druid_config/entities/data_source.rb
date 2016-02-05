@@ -41,6 +41,44 @@ module DruidConfig
         end
       end
 
+      # Enable the current data source
+      #
+      def enable
+        secure_query do
+          self.class.post("/datasources/#{@name}")
+        end
+      end
+
+      # Disable the current data source
+      #
+      def disable
+        secure_query do
+          self.class.delete("/datasources/#{@name}")
+        end
+      end
+
+      # Destroy the current data source. Becareful, this action will remove the
+      # data associated to the data source
+      #
+      # @param interval [String] Optional parameter to define the interval to
+      #   destroy the data associated to the data source. By default, it will
+      #   destroy all data.
+      #
+      # @return [Hash, nil] Hash with error or nil
+      #
+      def destroy(interval = nil)
+        interval = all_interval unless interval
+        # Disable data source
+        disable
+        # Execute kill task
+        secure_query do
+          self.class.delete(
+            "/datasources/#{@name}?kill=true&interval=#{interval}")
+        end
+      end
+
+      # Destroy current data source
+
       # Intervals
       # -----------------
       def intervals(params = '')
@@ -125,6 +163,19 @@ module DruidConfig
       end
 
       private
+
+      # Return an ISO8601 interval from 0 to tomorrow. This is used to destroy
+      # all the data of a data source
+      #
+      # @return [String] ISO8601 interval
+      #
+      def all_interval
+        beginning = '1970-01-01T00:00:00Z'
+        # We use today + 1.day to ensure all data is deleted
+        last = (Time.now + 24*60*60).strftime('%Y-%m-%dT%H:%M:00Z')
+        # Return the interval
+        "#{beginning}/#{last}"
+      end
 
       #
       # Save rules of this data source
