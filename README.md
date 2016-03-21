@@ -1,4 +1,6 @@
-[![Gem Version](https://badge.fury.io/rb/druid_config.svg)](https://badge.fury.io/rb/druid_config) [![Build Status](https://travis-ci.org/redBorder/druid_config.svg)](https://travis-ci.org/redBorder/druid_config)
+[![Gem Version](https://badge.fury.io/rb/druid_config.svg)](https://badge.fury.io/rb/druid_config) 
+[![Build Status](https://travis-ci.org/redBorder/druid_config.svg)](https://travis-ci.org/redBorder/druid_config)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/41da188b22f44f748b09dfdf7c541ac5)](https://www.codacy.com/app/redBorder/druid_config)
 
 # DruidConfig
 
