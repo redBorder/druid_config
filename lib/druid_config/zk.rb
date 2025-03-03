@@ -14,8 +14,8 @@ module DruidConfig
   #
   class ZK
     # Coordinator service
-    COORDINATOR = 'coordinator'
-    OVERLORD = 'overlord'
+    COORDINATOR = 'druid:coordinator'
+    OVERLORD = 'druid:overlord'
     SERVICES = [COORDINATOR, OVERLORD]
 
     #
